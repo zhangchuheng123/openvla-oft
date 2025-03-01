@@ -823,8 +823,12 @@ def finetune(cfg: FinetuneConfig) -> None:
         AutoModelForVision2Seq.register(OpenVLAConfig, OpenVLAForActionPrediction)
 
     # Update config.json and sync model files
-    update_auto_map(cfg.vla_path)
-    check_model_logic_mismatch(cfg.vla_path)
+    if distributed_state.is_main_process:
+        update_auto_map(cfg.vla_path)
+        check_model_logic_mismatch(cfg.vla_path)
+
+    # Wait for model files to be synced
+    dist.barrier()
 
     # Load processor and VLA
     processor = AutoProcessor.from_pretrained(cfg.vla_path, trust_remote_code=True)
