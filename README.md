@@ -10,7 +10,7 @@
 
 Inference:
 * 1 GPU with ~16 GB VRAM for LIBERO sim benchmark tasks
-* 1 GPU with ~25 GB VRAM for ALOHA robot tasks
+* 1 GPU with ~18 GB VRAM for ALOHA robot tasks
 
 Training:
 * Between 1-8 GPUs with 27-80 GB, depending on the desired training setup (with default bfloat16 data type). See [this FAQ on our project website](https://openvla-oft.github.io/#train-compute) for details.
