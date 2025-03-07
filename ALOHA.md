@@ -19,7 +19,7 @@ Note: Unlike the LIBERO evaluation setup, we use a server-client interface here.
 
 Training
 * `experiments/robot/aloha/`: ALOHA training and eval files
-  * 
+  * `preprocess_split_aloha_data.py`: ALOHA data preprocessing script
 * `vla-scripts/finetune.py`: VLA fine-tuning script
 
 ## Setup
@@ -30,7 +30,7 @@ Set up a conda environment for training policies and deploying them on the VLA s
 
 We assume that you have collected a set of expert demonstrations on the ALOHA robot already.
 
-First, use our `preprocess_split_aloha_data.py` script to preprocess the raw ALOHA dataset: downsize images from 480x640 to 256x256 and split into training and validation sets. Below are examples for the `put X into pot` task in our paper:
+First, use our `preprocess_split_aloha_data.py` script to preprocess the raw ALOHA dataset: downsize images from 480x640 to 256x256 and split into training and validation sets. Below are examples for the `put X into pot` task in our paper (which has 3 possible target objects, 1 per episode):
 
 ```bash
 python experiments/robot/aloha/preprocess_split_aloha_data.py \
@@ -49,9 +49,9 @@ python experiments/robot/aloha/preprocess_split_aloha_data.py \
 
 Then, convert the preprocessed ALOHA datasets into a single RLDS dataset that is compatible with OpenVLA fine-tuning. This process is the same as in the original OpenVLA repo. See instructions for converting to RLDS [here](https://github.com/moojink/rlds_dataset_builder) (a sample ALOHA preprocessed-to-RLDS conversion script is available [here](https://github.com/moojink/rlds_dataset_builder/blob/main/aloha1_put_X_into_pot_300_demos/aloha1_put_X_into_pot_300_demos_dataset_builder.py); this script converts the three preprocessed datasets above into one unified RLDS dataset, with train/val splits).
 
-After converting to RLDS, register the dataset with our dataloader by adding an entry for it in `configs.py` ([here](prismatic/vla/datasets/rlds/oxe/configs.py#L680)), `transforms.py` ([here](prismatic/vla/datasets/rlds/oxe/transforms.py#L928)), and `mixtures.py` ([here](prismatic/vla/datasets/rlds/oxe/mixtures.py#L216)). For reference, in each of these files, there are sample entries for the ALOHA datasets that we used in our paper.
+After converting to RLDS, register the dataset (which, for the example task above, would be called `aloha1_put_X_into_pot_300_demos`) with our dataloader by adding an entry for it in `configs.py` ([here](prismatic/vla/datasets/rlds/oxe/configs.py#L680)), `transforms.py` ([here](prismatic/vla/datasets/rlds/oxe/transforms.py#L928)), and `mixtures.py` ([here](prismatic/vla/datasets/rlds/oxe/mixtures.py#L216)). For reference, in each of these files, there are sample entries for the ALOHA datasets that we used in our paper.
 
-Before fine-tuning, set the desired ALOHA action chunk size in [`prismatic/vla/constants.py`](prismatic/vla/constants.py) (see `NUM_ACTIONS_CHUNK` in `ALOHA_CONSTANTS`). We set it to 25 by default because we used a control frequency of 25 Hz in our ALOHA setup to reduce storage costs and training time (while still maintaining smoothness in the robot's motions). If you use 50 Hz, we recommend setting `NUM_ACTIONS_CHUNK` to `50`. In general, 1 second-long action chunks are a good default.
+Before fine-tuning, set the desired ALOHA action chunk size in [`prismatic/vla/constants.py`](prismatic/vla/constants.py) (see `NUM_ACTIONS_CHUNK` in `ALOHA_CONSTANTS`). We set it to 25 by default because we used a control frequency of 25 Hz in our ALOHA setup to reduce storage costs and training time (while still maintaining smoothness in the robot's motions). If you use 50 Hz, we recommend setting `NUM_ACTIONS_CHUNK` to `50`. In general, 1 second-long action chunks are a good default. Do NOT modify `ACTION_PROPRIO_NORMALIZATION_TYPE`: Since the ALOHA robot action space is absolute joint angles, we do not want to use a normalization scheme that clips outlier values (like the Q1-Q99 normalization we used with the relative end-effector pose actions for LIBERO), since that would prevent the model from outputting certain robot joint angles that are crucial for solving the task.
 
 Now begin fine-tuning! Below is a sample command to fine-tune OpenVLA using our OFT+ recipe on the `put X into pot` task above ("+" in "OFT+" means FiLM is included for enhanced language grounding). Replace `X` in the first line with the number of GPUs available to you.
 
@@ -94,17 +94,29 @@ If you run into any issues, please open a new GitHub issue.
 
 ## Launching ALOHA Robot Evaluations
 
-On the machine that you will use to command the robot, set up a second lightweight conda environment that will be used to run the robot environment, query the VLA server, and execute actions in the environment:
+In the primary conda environment (`openvla-oft`) which you will use to launch the VLA server, install a few packages for the server-client interface:
+
+```bash
+conda activate openvla-oft
+pip install uvicorn fastapi json-numpy
+```
+
+On the machine that you will use to command the robot, set up a second conda environment that will be used to run the robot environment, query the VLA server, and execute actions in the environment:
 
 ```bash
 # Create and activate client conda environment
 # NOTE: We set `python=3.8.10` (different from server conda env) to be compatible with ROS Noetic!
-conda create -n openvla-oft-aloha python=3.8.10 -y
+conda create -n openvla-oft-aloha python=3.10 -y
 conda activate openvla-oft-aloha
 
 # Install PyTorch
 # Use a command specific to your machine: https://pytorch.org/get-started/locally/
 pip3 install torch torchvision torchaudio
+
+# Clone openvla-oft repo and pip install to download dependencies
+git clone https://github.com/moojink/openvla-oft.git
+cd openvla-oft
+pip install -e .
 
 # Install packages needed for the ALOHA robot environment
 pip install -r experiments/robot/aloha/requirements_aloha.txt
@@ -118,10 +130,10 @@ python vla-scripts/deploy.py \
   --use_l1_regression True \
   --use_film True \
   --num_images_in_input 3 \
-  --use_proprio True
+  --use_proprio True \
   --center_crop True \
   --num_open_loop_steps 25 \
-  --unnorm_key aloha1_put_X_into_pot_300_demos \
+  --unnorm_key aloha1_put_X_into_pot_300_demos
 ```
 
 Then, run the ALOHA evaluation script. Specify the VLA server URL or IP address in the `vla_server_url` argument. Below is a sample command:
@@ -137,3 +149,11 @@ python experiments/robot/aloha/run_aloha_eval.py \
 ```
 
 If you run into any issues, please open a new GitHub issue.
+
+## Troubleshooting Tips
+
+* Tip #1: If you run into a ROS error such as `ImportError: /lib/x86_64-linux-gnu/libp11-kit.so.0: undefined symbol: ffi_type_pointer, version LIBFFI_BASE_7.0`, try running the following command in your client conda environment (`openvla-oft-aloha`):
+
+    ```
+    conda install -c conda-forge libffi
+    ```

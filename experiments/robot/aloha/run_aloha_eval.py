@@ -103,6 +103,7 @@ def setup_logging(cfg: GenerateConfig):
 
 def log_message(message: str, log_file=None):
     """Log a message to console and optionally to a log file."""
+    print(message)
     logger.info(message)
     if log_file:
         log_file.write(message + "\n")
