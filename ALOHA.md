@@ -105,7 +105,6 @@ On the machine that you will use to command the robot, set up a second conda env
 
 ```bash
 # Create and activate client conda environment
-# NOTE: We set `python=3.8.10` (different from server conda env) to be compatible with ROS Noetic!
 conda create -n openvla-oft-aloha python=3.10 -y
 conda activate openvla-oft-aloha
 
