@@ -88,9 +88,10 @@ If you run into any issues, please open a new GitHub issue. If you do not receiv
 If you use our code in your work, please cite [our paper](https://arxiv.org/abs/2502.19645):
 
 ```bibtex
-@article{kim25finetuning,
-title={Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success},
-author={{Moo Jin} Kim and Chelsea Finn and Percy Liang},
-journal = {arXiv preprint arXiv:2502.19645},
-year={2025},}
+@article{kim2025fine,
+  title={Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success},
+  author={Kim, Moo Jin and Finn, Chelsea and Liang, Percy},
+  journal={arXiv preprint arXiv:2502.19645},
+  year={2025}
+}
 ```
