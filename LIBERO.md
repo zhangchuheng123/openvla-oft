@@ -32,7 +32,7 @@ and LIBERO-10 datasets in RLDS data format (~10 GB total). You can use these to 
 train other methods. This step is optional since we provide pretrained OpenVLA-OFT checkpoints below.
 Note that these are the same datasets used in the original OpenVLA project. If needed, see details on how to download the original non-RLDS datasets [here](https://github.com/openvla/openvla?tab=readme-ov-file#libero-setup).
 ```bash
-git lfs clone git@hf.co:datasets/openvla/modified_libero_rlds
+git clone git@hf.co:datasets/openvla/modified_libero_rlds
 ```
 
 ## Launching LIBERO Evaluations
