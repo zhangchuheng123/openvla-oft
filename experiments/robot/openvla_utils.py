@@ -790,8 +790,8 @@ def get_vla_action(
                 use_film=use_film,
             )
 
-    # Extract subset of actions for open loop steps
-    return [action[i] for i in range(min(len(action), cfg.num_open_loop_steps))]
+    # Return action chunk as list of actions
+    return [action[i] for i in range(len(action))]
 
 
 def get_action_from_server(

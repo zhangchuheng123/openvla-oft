@@ -131,7 +131,6 @@ python vla-scripts/deploy.py \
   --num_images_in_input 3 \
   --use_proprio True \
   --center_crop True \
-  --num_open_loop_steps 25 \
   --unnorm_key aloha1_put_X_into_pot_300_demos
 ```
 
