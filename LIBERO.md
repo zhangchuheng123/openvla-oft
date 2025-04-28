@@ -37,14 +37,19 @@ git clone git@hf.co:datasets/openvla/modified_libero_rlds
 
 ## Launching LIBERO Evaluations
 
-We fine-tuned OpenVLA via LoRA (r=32) with our OFT recipe on four LIBERO task suites independently: LIBERO-Spatial, LIBERO-Object, LIBERO-Goal, and LIBERO-10 (also called LIBERO-Long).
-The four OpenVLA-OFT checkpoints for LIBERO are available on Hugging Face:
+We fine-tuned OpenVLA via LoRA (r=32) with our OFT recipe on four LIBERO task suites: LIBERO-Spatial, LIBERO-Object, LIBERO-Goal, and LIBERO-10 (also called LIBERO-Long).
+In the initial version of our paper, we trained one checkpoint for each LIBERO task suite independently. In an updated version of the paper, we conducted an additional experiment in which we trained a single policy on all four task suites combined (results for this are available in the Additional Experiments section in the Appendix). Overall, the results for the task-specific policies and the combined policy are comparable: 97.1% vs. 96.8% average success rate across the four suites, respectively.
+
+Below are the four independently trained OpenVLA-OFT checkpoints for LIBERO:
 * [moojink/openvla-7b-oft-finetuned-libero-spatial](https://huggingface.co/moojink/openvla-7b-oft-finetuned-libero-spatial)
 * [moojink/openvla-7b-oft-finetuned-libero-object](https://huggingface.co/moojink/openvla-7b-oft-finetuned-libero-object)
 * [moojink/openvla-7b-oft-finetuned-libero-goal](https://huggingface.co/moojink/openvla-7b-oft-finetuned-libero-goal)
 * [moojink/openvla-7b-oft-finetuned-libero-10](https://huggingface.co/moojink/openvla-7b-oft-finetuned-libero-10)
 
-To start evaluations with one of these checkpoints, run one of the commands below. Each will automatically download the appropriate checkpoint listed above. You can set the `TRANSFORMERS_CACHE` and `HF_HOME` environment variable to change where the checkpoint files get cached.
+Below is the OpenVLA-OFT checkpoint trained on all four task suites combined:
+* [moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10](https://huggingface.co/moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10)
+
+To start evaluations with one of the independently trained checkpoints, run one of the commands below. Each will automatically download the appropriate checkpoint listed above. You can set the `TRANSFORMERS_CACHE` and `HF_HOME` environment variable to change where the checkpoint files get cached.
 
 ```bash
 # Launch LIBERO-Spatial evals
@@ -67,6 +72,8 @@ python experiments/robot/libero/run_libero_eval.py \
   --pretrained_checkpoint moojink/openvla-7b-oft-finetuned-libero-10 \
   --task_suite_name libero_10
 ```
+
+To evaluate the policy trained on all four task suites together, simply swap out the `--pretrained_checkpoint` in the commands above with `moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10`.
 
 Notes:
 * The evaluation script will run 500 trials by default (10 tasks x 50 episodes each). You can modify the number of
