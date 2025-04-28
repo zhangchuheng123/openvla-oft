@@ -99,6 +99,8 @@ class GenerateConfig:
     center_crop: bool = True                         # Center crop? (if trained w/ random crop image aug)
     num_open_loop_steps: int = 8                     # Number of actions to execute open-loop before requerying policy
 
+    lora_rank: int = 32                              # Rank of LoRA weight matrix (MAKE SURE THIS MATCHES TRAINING!)
+
     unnorm_key: Union[str, Path] = ""                # Action un-normalization key
 
     load_in_8bit: bool = False                       # (For OpenVLA only) Load with 8-bit quantization

@@ -131,6 +131,8 @@ class DeployConfig:
 
     center_crop: bool = True                         # Center crop? (if trained w/ random crop image aug)
 
+    lora_rank: int = 32                              # Rank of LoRA weight matrix (MAKE SURE THIS MATCHES TRAINING!)
+
     unnorm_key: Union[str, Path] = ""                # Action un-normalization key
     use_relative_actions: bool = False               # Whether to use relative actions (delta joint angles)
 

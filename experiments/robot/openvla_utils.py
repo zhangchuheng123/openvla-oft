@@ -323,8 +323,8 @@ def _apply_film_to_vla(vla: torch.nn.Module, cfg: Any) -> torch.nn.Module:
 
     # Apply LoRA configuration
     lora_config = LoraConfig(
-        r=32,
-        lora_alpha=16,
+        r=cfg.lora_rank,
+        lora_alpha=min(cfg.lora_rank, 16),
         lora_dropout=0.0,
         target_modules="all-linear",
         init_lora_weights="gaussian",
