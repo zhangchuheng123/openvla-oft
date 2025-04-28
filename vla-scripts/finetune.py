@@ -79,7 +79,7 @@ class FinetuneConfig:
     # Algorithm and architecture
     use_l1_regression: bool = True                   # If True, trains continuous action head with L1 regression objective
     use_diffusion: bool = False                      # If True, trains continuous action head with diffusion modeling objective (DDIM)
-    num_diffusion_steps: int = 50                    # (When `diffusion==True`) Number of diffusion steps for training
+    num_diffusion_steps_train: int = 50              # (When `diffusion==True`) Number of diffusion steps used for training
     use_film: bool = False                           # If True, uses FiLM to infuse language inputs into visual features
     num_images_in_input: int = 1                     # Number of images in the VLA input (default: 1)
     use_proprio: bool = False                        # If True, includes robot proprioceptive state in input
@@ -280,7 +280,7 @@ def run_forward_pass(
     use_film,
     num_patches,
     compute_diffusion_l1=False,
-    num_diffusion_steps=None,
+    num_diffusion_steps_train=None,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """
     Compute model forward pass and metrics for both training and validation.
@@ -300,7 +300,7 @@ def run_forward_pass(
         num_patches (int): Number of vision patches.
         compute_diffusion_l1 (bool): Whether to sample actions and compute L1 loss for diffusion (do this once every
                                     diffusion_sample_freq steps during training; do it every batch for validation)
-        num_diffusion_steps (int): Number of diffusion steps (only used for diffusion).
+        num_diffusion_steps_train (int): Number of diffusion steps for training (only used for diffusion).
 
     Returns:
         tuple: (loss, metrics_dict)
@@ -485,7 +485,7 @@ def run_diffusion_sampling(
     )  # (B, chunk_len, action_dim)
 
     # Set diffusion timestep values
-    action_head.module.noise_scheduler.set_timesteps(action_head.module.num_diffusion_steps)
+    action_head.module.noise_scheduler.set_timesteps(action_head.module.num_diffusion_steps_train)
 
     # Reverse diffusion: Iteratively denoise to generate action, conditioned on observation
     curr_noisy_actions = noise
@@ -723,7 +723,7 @@ def run_validation(
                 use_film=cfg.use_film,
                 num_patches=num_patches,
                 compute_diffusion_l1=True,
-                num_diffusion_steps=cfg.num_diffusion_steps if cfg.use_diffusion else None,
+                num_diffusion_steps_train=cfg.num_diffusion_steps_train if cfg.use_diffusion else None,
             )
 
             # Add the loss value to the metrics
@@ -906,7 +906,7 @@ def finetune(cfg: FinetuneConfig) -> None:
                 "input_dim": vla.module.llm_dim,
                 "hidden_dim": vla.module.llm_dim,
                 "action_dim": ACTION_DIM,
-                "num_diffusion_steps": cfg.num_diffusion_steps,
+                "num_diffusion_steps_train": cfg.num_diffusion_steps_train,
             },
             to_bf16=True,
         )
@@ -1049,7 +1049,7 @@ def finetune(cfg: FinetuneConfig) -> None:
                 use_film=cfg.use_film,
                 num_patches=NUM_PATCHES,
                 compute_diffusion_l1=compute_diffusion_l1,
-                num_diffusion_steps=cfg.num_diffusion_steps if cfg.use_diffusion else None,
+                num_diffusion_steps_train=cfg.num_diffusion_steps_train if cfg.use_diffusion else None,
             )
 
             # Normalize loss to account for gradient accumulation
