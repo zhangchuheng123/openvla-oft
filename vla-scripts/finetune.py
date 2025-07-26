@@ -59,6 +59,7 @@ from prismatic.vla.constants import (
     PROPRIO_DIM,
 )
 from prismatic.vla.datasets import RLDSBatchTransform, RLDSDataset
+from prismatic.vla.datasets import RobotBatchTransform, RobotDataset
 from prismatic.vla.datasets.rlds.utils.data_utils import save_dataset_statistics
 
 # Sane Defaults
@@ -110,9 +111,15 @@ class FinetuneConfig:
                                                      #   Note: Merging can be very slow on some machines. If so, set to
                                                      #         False and merge final checkpoint offline!
 
-    # Logging
-    wandb_entity: str = "your-wandb-entity"          # Name of WandB entity
-    wandb_project: str = "your-wandb-project"        # Name of WandB project
+    # Tracking Parameters
+    trackers: Tuple[str, ...] = ("jsonl", "wandb")                  # Trackers to initialize (if W&B, add config!)
+    wandb_host: str = "https://microsoft-research.wandb.io"
+    wandb_project: str = "openvla"                                  # Name of W&B project to log to (use default!)
+    wandb_entity: str = "msra_rl"                                   # Name of entity to log under
+    wandb_api_key: str = "local-fb872608a0ec758c86ab35d24eec1373fe2d9313"
+    wandb_run_name: str = "test"
+    wandb_run_id_note: Optional[str] = None                               # Extra note for logging, Weights & Biases
+    
     run_id_note: Optional[str] = None                # Extra note to add to end of run ID for logging
     run_id_override: Optional[str] = None            # Optional string to override the run ID with
     wandb_log_freq: int = 10                         # WandB logging frequency in steps
@@ -967,7 +974,7 @@ def finetune(cfg: FinetuneConfig) -> None:
     use_wrist_image = cfg.num_images_in_input > 1
 
     # Create training and optional validation datasets
-    batch_transform = RLDSBatchTransform(
+    batch_transform = RobotBatchTransform(
         action_tokenizer,
         processor.tokenizer,
         image_transform=processor.image_processor.apply_transform,
@@ -975,7 +982,15 @@ def finetune(cfg: FinetuneConfig) -> None:
         use_wrist_image=use_wrist_image,
         use_proprio=cfg.use_proprio,
     )
-    train_dataset = RLDSDataset(
+    # batch_transform = RLDSBatchTransform(
+    #     action_tokenizer,
+    #     processor.tokenizer,
+    #     image_transform=processor.image_processor.apply_transform,
+    #     prompt_builder_fn=PurePromptBuilder,
+    #     use_wrist_image=use_wrist_image,
+    #     use_proprio=cfg.use_proprio,
+    # )
+    train_dataset = RobotDataset(
         cfg.data_root_dir,
         cfg.dataset_name,
         batch_transform,
@@ -983,6 +998,15 @@ def finetune(cfg: FinetuneConfig) -> None:
         shuffle_buffer_size=cfg.shuffle_buffer_size,
         image_aug=cfg.image_aug,
     )
+    # train_dataset = RLDSDataset(
+    #     cfg.data_root_dir,
+    #     cfg.dataset_name,
+    #     batch_transform,
+    #     resize_resolution=tuple(vla.module.config.image_sizes),
+    #     shuffle_buffer_size=cfg.shuffle_buffer_size,
+    #     image_aug=cfg.image_aug,
+    # )
+    cfg.use_val_set = False
     if cfg.use_val_set:
         val_dataset = RLDSDataset(
             cfg.data_root_dir,

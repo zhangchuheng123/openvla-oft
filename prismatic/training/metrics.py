@@ -69,6 +69,10 @@ class WeightsBiasesTracker:
 
     @overwatch.rank_zero_only
     def initialize(self) -> None:
+        wandb.login(
+            key="local-fb872608a0ec758c86ab35d24eec1373fe2d9313", 
+            host="https://microsoft-research.wandb.io",
+        )
         wandb.init(
             name=self.run_id,
             dir=self.wandb_dir,
