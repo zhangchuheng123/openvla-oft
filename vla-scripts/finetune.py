@@ -998,7 +998,7 @@ def finetune(cfg: FinetuneConfig) -> None:
             "action_type": "poseulerg",
             "wrist_key": "wrist_image",
             "image_key": "primary_image_crop",
-            "action_chunk_size": 4,
+            "action_chunk_size": 5,
             "proprio_hist_size": 0,
             "proprio_chunk_size": 1,
             "force_regenerate_meta": False,

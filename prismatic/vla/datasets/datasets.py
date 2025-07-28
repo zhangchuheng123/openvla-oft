@@ -54,9 +54,10 @@ class RobotBatchTransform:
         # debug RobotBatchTransform
         import pdb; pdb.set_trace()
 
-        dataset_name, current_action = rlds_batch["dataset_name"], rlds_batch["action"][0]
+        dataset_name =  "dataset_v6"  # rlds_batch["dataset_name"]
+        current_action = rlds_batch["action"][0]
         img = Image.fromarray(rlds_batch["observation"]["image_primary"][0])
-        lang = rlds_batch["task"]["language_instruction"].decode().lower()
+        lang = rlds_batch["task"]["language_instruction"].lower()
         actions = rlds_batch["action"]
 
         # Construct Chat-based Prompt =>> Input is default query + language instruction, output are the action tokens
