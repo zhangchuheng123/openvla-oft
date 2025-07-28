@@ -111,10 +111,21 @@ class RobotBatchTransform:
 
 
 class RobotDataset(torch.utils.data.IterableDataset):
-    """Thin wrapper around RLDS dataset for use with PyTorch dataloaders."""
+    """
+    train_dataset = RobotDataset(
+        cfg.data_root_dir,
+        cfg.dataset_name,
+        batch_transform,
+        resize_resolution=tuple(vla.module.config.image_sizes),
+        shuffle_buffer_size=cfg.shuffle_buffer_size,
+        image_aug=cfg.image_aug,
+    )
+    """
 
-    def __init__(self, config, train=True, num_workers=4):
+    def __init__(self, config, batch_transform, train=True, num_workers=4):
         
+        self.batch_transform = batch_transform
+
         self.proprio_type = config.proprio_type
         self.action_type = config.action_type 
 
@@ -473,7 +484,7 @@ class RobotDataset(torch.utils.data.IterableDataset):
             sample = random.choices(self.metadata, weights=self.weights)[0]
             index = random.randint(0, sample['num_steps'] - 1)
 
-            yield self._get_data(sample, index)
+            yield self.batch_transform(self._get_data(sample, index))
 
     def __len__(self):
         return len(self.metadata)

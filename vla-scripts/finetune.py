@@ -6,8 +6,10 @@ Fine-tunes OpenVLA via LoRA.
 
 import os
 import time
+import wandb
 from collections import deque
 from dataclasses import dataclass
+from omegaconf import OmegaConf
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Type
 
@@ -25,8 +27,6 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor
 from transformers.modeling_outputs import CausalLMOutputWithPast
-
-import wandb
 
 from experiments.robot.openvla_utils import (
     check_model_logic_mismatch,
@@ -990,13 +990,26 @@ def finetune(cfg: FinetuneConfig) -> None:
     #     use_wrist_image=use_wrist_image,
     #     use_proprio=cfg.use_proprio,
     # )
+
+    ds_config = OmegaConf.create(
+        {
+            "data_path": "/mnt/chuheng_data/robot_ft_data/data_v6/data_v6_combined/processed/",
+            "proprio_type": "poseulerg",
+            "action_type": "poseulerg",
+            "wrist_key": "wrist_image",
+            "image_key": "primary_image_crop",
+            "action_chunk_size": 4,
+            "proprio_hist_size": 0,
+            "proprio_chunk_size": 1,
+            "force_regenerate_meta": False,
+            "plot_hist": True
+        }
+    )
+
     train_dataset = RobotDataset(
-        cfg.data_root_dir,
-        cfg.dataset_name,
+        ds_config,
         batch_transform,
-        resize_resolution=tuple(vla.module.config.image_sizes),
-        shuffle_buffer_size=cfg.shuffle_buffer_size,
-        image_aug=cfg.image_aug,
+        train=True,
     )
     # train_dataset = RLDSDataset(
     #     cfg.data_root_dir,
@@ -1009,12 +1022,8 @@ def finetune(cfg: FinetuneConfig) -> None:
     cfg.use_val_set = False
     if cfg.use_val_set:
         val_dataset = RLDSDataset(
-            cfg.data_root_dir,
-            cfg.dataset_name,
+            ds_config,
             batch_transform,
-            resize_resolution=tuple(vla.module.config.image_sizes),
-            shuffle_buffer_size=cfg.shuffle_buffer_size // 10,
-            image_aug=cfg.image_aug,
             train=False,
         )
 
