@@ -1028,8 +1028,8 @@ def finetune(cfg: FinetuneConfig) -> None:
         )
 
     # [Important] Save dataset statistics so that we can unnormalize actions during inference
-    if distributed_state.is_main_process:
-        save_dataset_statistics(train_dataset.dataset_statistics, run_dir)
+    # if distributed_state.is_main_process:
+    #     save_dataset_statistics(train_dataset.dataset_statistics, run_dir)
 
     # Create collator and dataloader
     collator = PaddedCollatorForActionPrediction(
