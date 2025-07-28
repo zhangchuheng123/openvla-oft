@@ -51,12 +51,9 @@ class RobotBatchTransform:
     def __call__(self, rlds_batch: Dict[str, Any]) -> Dict[str, Any]:
         """Converts a RLDS batch to the format expected by the OpenVLA collator/models."""
 
-        # debug RobotBatchTransform
-        import pdb; pdb.set_trace()
-
         dataset_name =  "dataset_v6"  # rlds_batch["dataset_name"]
         current_action = rlds_batch["action"][0]
-        img = Image.fromarray(rlds_batch["observation"]["image_primary"][0])
+        img = Image.fromarray(rlds_batch["observation"]["image_primary"][0].numpy())
         lang = rlds_batch["task"]["language_instruction"].lower()
         actions = rlds_batch["action"]
 
@@ -94,6 +91,9 @@ class RobotBatchTransform:
             labels[-1] = IGNORE_INDEX
 
         return_dict = dict(pixel_values=pixel_values, input_ids=input_ids, labels=labels, dataset_name=dataset_name, actions=actions)
+
+        # debug RobotBatchTransform
+        import pdb; pdb.set_trace()
 
         # Add additional inputs
         if self.use_wrist_image:
