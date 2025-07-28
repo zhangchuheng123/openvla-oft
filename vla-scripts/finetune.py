@@ -797,6 +797,8 @@ def finetune(cfg: FinetuneConfig) -> None:
 
     # Initialize wandb logging
     if distributed_state.is_main_process:
+        import pdb 
+        pdb.set_trace()
         wandb.init(entity=cfg.wandb_entity, project=cfg.wandb_project, name=f"ft+{run_id}")
 
     # Print detected constants
