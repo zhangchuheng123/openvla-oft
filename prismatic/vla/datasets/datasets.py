@@ -90,17 +90,20 @@ class RobotBatchTransform:
         if not self.predict_stop_token:
             labels[-1] = IGNORE_INDEX
 
-        return_dict = dict(pixel_values=pixel_values, input_ids=input_ids, labels=labels, dataset_name=dataset_name, actions=actions)
-
-        # debug RobotBatchTransform
-        import pdb; pdb.set_trace()
+        return_dict = dict(
+            pixel_values=pixel_values, 
+            input_ids=input_ids, 
+            labels=labels, 
+            dataset_name=dataset_name, 
+            actions=actions
+        )
 
         # Add additional inputs
         if self.use_wrist_image:
             all_wrist_pixels = []
             for k in rlds_batch["observation"].keys():
                 if "wrist" in k:
-                    img_wrist = Image.fromarray(rlds_batch["observation"][k][0])
+                    img_wrist = Image.fromarray(rlds_batch["observation"][k][0].numpy())
                     pixel_values_wrist = self.image_transform(img_wrist)
                     all_wrist_pixels.append(pixel_values_wrist)
             return_dict["pixel_values_wrist"] = torch.cat(all_wrist_pixels, dim=0)
