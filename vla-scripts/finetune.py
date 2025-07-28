@@ -114,7 +114,7 @@ class FinetuneConfig:
     # Tracking Parameters
     trackers: Tuple[str, ...] = ("jsonl", "wandb")                  # Trackers to initialize (if W&B, add config!)
     wandb_host: str = "https://microsoft-research.wandb.io"
-    wandb_project: str = "openvla"                                  # Name of W&B project to log to (use default!)
+    wandb_project: str = "openvla_oft"                                  # Name of W&B project to log to (use default!)
     wandb_entity: str = "msra_rl"                                   # Name of entity to log under
     wandb_api_key: str = "local-fb872608a0ec758c86ab35d24eec1373fe2d9313"
     wandb_run_name: str = "test"
@@ -797,8 +797,6 @@ def finetune(cfg: FinetuneConfig) -> None:
 
     # Initialize wandb logging
     if distributed_state.is_main_process:
-        import pdb 
-        pdb.set_trace()
         wandb.init(entity=cfg.wandb_entity, project=cfg.wandb_project, name=f"ft+{run_id}")
 
     # Print detected constants
