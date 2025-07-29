@@ -1130,9 +1130,11 @@ def finetune(cfg: FinetuneConfig) -> None:
                 scheduler.step()
                 optimizer.zero_grad()
                 progress.update()
+                print(f"gradient step {gradient_step_idx} | log step {log_step}")
 
             # Save model checkpoint: either keep latest checkpoint only or all checkpoints
             if gradient_step_idx > 0 and log_step % cfg.save_freq == 0:
+                print(f"save checkpoint at step {log_step} to {run_dir}")
                 save_training_checkpoint(
                     cfg=cfg,
                     run_dir=run_dir,
