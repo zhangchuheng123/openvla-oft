@@ -1,5 +1,5 @@
 # torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
-python vla-scripts/finetune.py \
+torchrun --standalone --nproc-per-node 1 vla-scripts/finetune.py \
   --vla_path openvla/openvla-7b \
   --data_root_dir /mnt/chuheng_data/robot_ft_data/data_v6/data_v6_combined/processed/ \
   --dataset_name data_v6_combined \
