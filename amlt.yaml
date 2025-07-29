@@ -1,0 +1,74 @@
+# Docs: https://amulet-docs.azurewebsites.net/main/setup.html
+
+#   amlt login
+#   amlt target add-defaults gcr
+#   amlt target add --subscription 3f2ab3f5-468d-4ba7-bc14-9d3a9da4bcc5 --resource-group GCRArcK8sAMLProd2 --workspace-name gcrarck8s4ws2
+#   amlt target add --subscription 1584df91-d540-4cd3-a9ca-24ff3dc95ba7 --resource-group UKSouth --workspace-name DRL-AML
+#   amlt target add --subscription 1584df91-d540-4cd3-a9ca-24ff3dc95ba7 --resource-group WestUS3 --workspace-name Light-AML
+#   amlt target add --subscription 1584df91-d540-4cd3-a9ca-24ff3dc95ba7 --resource-group JapanEast --workspace-name BonusAML 
+#   amlt target info aml
+#   amlt project create IGOR bonusaml4242345487 chuhengzhang
+#   amlt project checkout IGOR bonusaml4242345487 chuhengzhang
+#   amlt metadata-download exp60
+
+# Submit using the following commands
+#   amlt storage upload --config-file amlt_h.yaml 
+#   amlt run amlt.yaml exp8
+
+description: chuheng
+
+target:
+  service: aml
+  name: lightcluster
+  # run "amlt target list amlk8s" to list the names of available AMLK8s targets
+  # name: fast8H100
+
+environment:
+  image: pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
+  registry: docker.io # any public registry can be specified here
+
+code:
+  # local directory of the code. this will be uploaded to the server.
+  # $CONFIG_DIR is expanded to the directory of this config file
+  local_dir: $CONFIG_DIR
+  ignore:
+  - runs/
+  - wandb/
+
+storage:
+  external:
+    # storage_account_name: bonusaml4242345487
+    storage_account_name: lightaml3149727845
+    container_name: sharedcontainer
+    mount_dir: /mnt/shared_data
+
+jobs:
+- name: chuheng_openvla_exp8_rt1_norm_light
+  sku: 512C1
+  identity: managed
+  sla_tier: standard
+  priority: high
+  command:
+  - apt-get update
+  - apt-get install git -y
+  - apt-get install ffmpeg libsm6 libxext6 -y
+  - conda update -n base -c defaults conda -y
+  - conda create -n openvla python=3.10 -y
+  - conda init zsh
+  - source /root/.zshrc
+  - conda activate openvla
+  - conda install -c nvidia cuda=12.4 -y
+  - conda install pytorch=2.2.0 torchvision=0.17.0 torchaudio=2.2.0 pytorch-cuda=12.4 -c pytorch -c nvidia -y 
+  - pip install packaging ninja --no-cache-dir -U
+  - pip install draccus tqdm peft wandb opencv-python
+  - pip install -e .                              # pytorch -> 2.2.0 this must set before installation of xformers and flash-attn
+  - pip install -e UnifiedDataLoader/
+  - pip install --pre -U xformers==0.0.26.post1   # pytorch -> 2.3.0
+  - FLASH_ATTENTION_FORCE_BUILD=TRUE pip install "flash-attn==2.5.5" --no-build-isolation
+  - bash exp8_train_minivla_udl_rt1.sh
+  - echo "finish code running!"
+  submit_args:
+    env:
+      AMLT_DIRSYNC_MOVE: "true"
+    container_args:
+      shm_size: 512g

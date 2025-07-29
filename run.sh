@@ -1,5 +1,10 @@
-# torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
-torchrun --standalone --nproc-per-node 1 vla-scripts/finetune.py \
+NUM_GPU="$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)"
+if [[ "$NUM_GPU" == "1" ]]; then
+  PER_DEVICE_BS=8
+else
+  PER_DEVICE_BS=32
+fi
+torchrun --standalone --nnodes 1 --nproc-per-node $NUM_GPU vla-scripts/finetune.py \
   --vla_path openvla/openvla-7b \
   --data_root_dir /mnt/chuheng_data/robot_ft_data/data_v6/data_v6_combined/processed/ \
   --dataset_name data_v6_combined \
