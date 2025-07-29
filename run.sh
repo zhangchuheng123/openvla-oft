@@ -1,4 +1,5 @@
-torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
+# torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
+python vla-scripts/finetune.py \
   --vla_path openvla/openvla-7b \
   --data_root_dir /mnt/chuheng_data/robot_ft_data/data_v6/data_v6_combined/processed/ \
   --dataset_name data_v6_combined \
@@ -8,11 +9,8 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --use_film False \
   --num_images_in_input 2 \
   --use_proprio True \
-  --batch_size 8 \
   --learning_rate 5e-4 \
   --num_steps_before_decay 100000 \
-  --max_steps 150005 \
-  --save_freq 10000 \
   --save_latest_checkpoint_only False \
   --image_aug True \
   --lora_rank 32 \

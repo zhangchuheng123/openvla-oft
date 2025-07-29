@@ -86,14 +86,14 @@ class FinetuneConfig:
     use_proprio: bool = False                        # If True, includes robot proprioceptive state in input
 
     # Training configuration
-    batch_size: int = 8                              # Batch size per device (total batch size = batch_size * num GPUs)
+    batch_size: int = 16                              # Batch size per device (total batch size = batch_size * num GPUs)
     learning_rate: float = 5e-4                      # Learning rate
     lr_warmup_steps: int = 0                         # Number of steps to warm up learning rate (from 10% to 100%)
     num_steps_before_decay: int = 100_000            # Number of steps before LR decays by 10x
-    grad_accumulation_steps: int = 1                 # Number of gradient accumulation steps
+    grad_accumulation_steps: int = 8                 # Number of gradient accumulation steps
     max_steps: int = 200_000                         # Max number of training steps
     use_val_set: bool = False                        # If True, uses validation set and log validation metrics
-    val_freq: int = 10_000                           # (When `use_val_set==True`) Validation set logging frequency in steps
+    val_freq: int = 10                               # (When `use_val_set==True`) Validation set logging frequency in steps
     val_time_limit: int = 180                        # (When `use_val_set==True`) Time limit for computing validation metrics
     save_freq: int = 500                             # Checkpoint saving frequency in steps
     save_latest_checkpoint_only: bool = False        # If True, saves only 1 checkpoint, overwriting latest checkpoint
